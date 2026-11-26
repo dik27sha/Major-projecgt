@@ -61,6 +61,74 @@ class TestResumeAnalyzer(unittest.TestCase):
             with self.assertRaises(ValueError):
                 analyze_resume("Sample resume")
 
+    # Day 2 additional tests
+
+    def test_none_resume(self):
+        with self.assertRaises(ValueError):
+            analyze_resume(None)
+
+    def test_non_dict_response(self):
+        with patch(
+            "src.resume_analyzer.ask_openai",
+            return_value=json.dumps(["invalid", "data"])
+        ):
+            with self.assertRaises(ValueError):
+                analyze_resume("Sample resume")
+
+    def test_summary_must_be_string(self):
+        invalid_response = {
+            "summary": ["Python developer"],
+            "skills": ["Python"],
+            "education": [],
+            "experience": [],
+            "skill_gaps": [],
+            "roadmap": [],
+            "job_keywords": []
+        }
+
+        with patch(
+            "src.resume_analyzer.ask_openai",
+            return_value=json.dumps(invalid_response)
+        ):
+            with self.assertRaises(ValueError):
+                analyze_resume("Sample resume")
+
+    def test_skills_must_be_list(self):
+        invalid_response = {
+            "summary": "Python developer",
+            "skills": "Python, SQL",
+            "education": [],
+            "experience": [],
+            "skill_gaps": [],
+            "roadmap": [],
+            "job_keywords": []
+        }
+
+        with patch(
+            "src.resume_analyzer.ask_openai",
+            return_value=json.dumps(invalid_response)
+        ):
+            with self.assertRaises(ValueError):
+                analyze_resume("Sample resume")
+
+    def test_all_analysis_lists_must_be_valid(self):
+        invalid_response = {
+            "summary": "Python developer",
+            "skills": ["Python"],
+            "education": "B.Tech",
+            "experience": [],
+            "skill_gaps": [],
+            "roadmap": [],
+            "job_keywords": []
+        }
+
+        with patch(
+            "src.resume_analyzer.ask_openai",
+            return_value=json.dumps(invalid_response)
+        ):
+            with self.assertRaises(ValueError):
+                analyze_resume("Sample resume")
+
 
 if __name__ == "__main__":
     unittest.main()
