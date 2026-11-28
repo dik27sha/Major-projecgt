@@ -33,7 +33,13 @@ def analyze_resume(resume_text):
         "{resume_text}", resume_text
     )
 
-    response = ask_openai(prompt, max_tokens=2000)
+    # Day 4: Handle AI API failures
+    try:
+        response = ask_openai(prompt, max_tokens=2000)
+    except Exception as error:
+        raise RuntimeError(
+            "Unable to connect to AI service."
+        ) from error
 
     try:
         analysis = json.loads(response)

@@ -129,6 +129,49 @@ class TestResumeAnalyzer(unittest.TestCase):
             with self.assertRaises(ValueError):
                 analyze_resume("Sample resume")
 
+    # Day 4 additional tests
+
+    def test_resume_with_only_spaces(self):
+        with self.assertRaises(ValueError):
+            analyze_resume("     ")
+
+    def test_ai_returns_empty_response(self):
+        with patch(
+            "src.resume_analyzer.ask_openai",
+            return_value=""
+        ):
+            with self.assertRaises(ValueError):
+                analyze_resume("Sample resume")
+
+    def test_list_items_must_be_strings(self):
+        invalid_response = {
+            "summary": "Python developer",
+            "skills": ["Python", 123],
+            "education": [],
+            "experience": [],
+            "skill_gaps": [],
+            "roadmap": [],
+            "job_keywords": []
+        }
+
+        with patch(
+            "src.resume_analyzer.ask_openai",
+            return_value=json.dumps(invalid_response)
+        ):
+            with self.assertRaises(ValueError):
+                analyze_resume("Sample resume")
+
+    def test_ai_service_failure(self):
+        with patch(
+            "src.resume_analyzer.ask_openai",
+            side_effect=Exception("API connection failed")
+        ):
+            with self.assertRaisesRegex(
+                RuntimeError,
+                "Unable to connect to AI service."
+            ):
+                analyze_resume("Sample resume")
+
 
 if __name__ == "__main__":
     unittest.main()
